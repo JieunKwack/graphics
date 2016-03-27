@@ -29,7 +29,7 @@ def ondrag(event):
 
 #Update
 	P[select, :] = [event.xdata, event.ydata];
-	Bezier = deCasteljau();
+	Bezier = deCasteljau(NR_CP-1, 0);
 	line.set_data(P[:,0], P[:,1]);
 	bezier.set_data(Bezier[:,0], Bezier[:,1]);
 	fig.canvas.draw()
@@ -42,16 +42,13 @@ def onrelease(event):
 	select = -1
 	return True;
 
-def deCasteljau():
+def deCasteljau(level, i):
 	global P, Bezier
 	t = np.arange(0, 1.01, 0.01).reshape(101,1)
-	c_b0 = ((1-t)**3)
-	c_b1 = (3*t*((1-t)**2))
-	c_b2 = (3*(t**2)*(1-t))
-	c_b3 = (t**3)
-	Bezier = c_b0*P[0,:]+c_b1*P[1,:]+c_b2*P[2,:]+c_b3*P[3,:]
+	if(level == 0): return P[i,:]
+	Bezier = (1-t)*deCasteljau(level-1, i)+t*deCasteljau(level-1, i+1)
 	return Bezier
-	
+
 select = -1; # select : point that was changed
 
 P = np.random.rand(NR_CP, 2) # 4개의 control points(that 4x2 matrix format)를 랜덤하게 생성
@@ -59,7 +56,7 @@ P = np.random.rand(NR_CP, 2) # 4개의 control points(that 4x2 matrix format)를
 fig	   = plt.figure() # create a new figure
 # 마치 매틀랩에서 plot찍기전에 figure 하나 생성하는 것과 같은 느낌!할 수 있다 지은아.
 line,  = plt.plot(P[:,0], P[:,1], 's-', picker=5)  # 5 points tolerance
-Bezier = deCasteljau();
+Bezier = deCasteljau(NR_CP-1, 0);
 bezier, = plt.plot(Bezier[:,0],Bezier[:,1],'-')
 # P[:,0], P[:,1] : plot x=(P[:,0]) and y=(P[:,1]), using 4개의 점을 찍음
 # '-' : solid line style, 's' : square marker
